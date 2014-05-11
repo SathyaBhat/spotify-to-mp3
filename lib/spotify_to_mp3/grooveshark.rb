@@ -1,6 +1,7 @@
 require 'fileutils'
 require 'rest-client'
 require 'spotify_to_mp3/grooveshark/track'
+require 'open-uri'
 
 module SpotifyToMp3
   class Grooveshark
@@ -15,8 +16,15 @@ module SpotifyToMp3
 
     def download(track)
       url = @client.get_song_url(track.client_track)
-      file = RestClient::Request.execute(:method => :post, :url => url, :raw_response => true).file
-      FileUtils.mv(file.path, track.filename)
+      puts "URL to download: %s" %url      
+      # Request.execute causes file to be downloaded incorrectly, use open method as a workaround
+      # file = RestClient::Request.execute(:method => :post, :url => url, :raw_response => true).file 
+      puts "File name:" + track.filename
+      open(track.filename, 'wb') do |file|
+        file << open(url).read
+      end
+      # To fix later, but for now let's just put it in current dir.
+      # FileUtils.mv(path, track.filename)
     end
   end
 end
